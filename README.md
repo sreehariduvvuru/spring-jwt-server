@@ -4,3 +4,5 @@ Spring Security has built-in support for JWTs using oAuth2 Resource Server. In t
 
 - [Blog Post](https://www.danvega.dev/blog/2022/09/06/spring-security-jwt/)
 - [YouTube](https://youtu.be/KYNR5js2cXE)"# jwt" 
+"# jwt" 
+"# spring-jwt-server" 
