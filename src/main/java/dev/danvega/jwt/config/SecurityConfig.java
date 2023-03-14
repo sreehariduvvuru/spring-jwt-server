@@ -2,14 +2,18 @@ package dev.danvega.jwt.config;
 
 import java.util.List;
 
+import dev.danvega.jwt.service.CustomAuthenticationProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -43,14 +47,16 @@ public class SecurityConfig {
 
 	private final RsaKeyProperties jwtConfigProperties;
 
+	@Autowired
+	CustomAuthenticationProvider customAuthenticationProvider;
+
 	public SecurityConfig(RsaKeyProperties jwtConfigProperties) {
 		this.jwtConfigProperties = jwtConfigProperties;
 	}
-
-	@Bean
-	public InMemoryUserDetailsManager users() {
-		return new InMemoryUserDetailsManager(User.withUsername("dvega").password("{noop}password").authorities("read").build());
-	}
+//	@Bean
+//	public InMemoryUserDetailsManager users() {
+//		return new InMemoryUserDetailsManager(User.withUsername("dvega").password("{noop}password").authorities("read").build());
+//	}
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -85,6 +91,14 @@ public class SecurityConfig {
 				.build();
 	}
 
+
+
+
+	@Bean
+	public WebSecurityCustomizer webSecurityCustomizer() {
+		return (web) -> web.ignoring().antMatchers("/registration");
+	}
+
 	@Bean
 	JwtDecoder jwtDecoder() {
 		return NimbusJwtDecoder.withPublicKey(jwtConfigProperties.publicKey()).build();
@@ -106,5 +120,11 @@ public class SecurityConfig {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
+	}
+
+	@Autowired
+	public void bindAuthenticationProvider(AuthenticationManagerBuilder authenticationManagerBuilder) {
+		authenticationManagerBuilder
+				.authenticationProvider(customAuthenticationProvider);
 	}
 }
